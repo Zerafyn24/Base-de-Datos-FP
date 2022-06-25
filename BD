@@ -1,0 +1,414 @@
+
+
+create database FarmaciasPeruanas;
+
+use FarmaciasPeruanas;
+
+
+
+-- Sexo
+create table sexo(
+	idSexo char(1) not null primary key,
+	Descripcion varchar(9)
+);
+
+-- Estado Persona
+create table EstadoPersona(
+	idEstado char(3) not null primary key,
+	Nombre varchar(25) not null,
+	Orden int
+);
+
+-- Pais de los proveedores
+create table Pais(
+    idPais char(2) not null primary key,
+	nombre varchar(225) not null,
+	Postal int
+);
+
+-- EstadoProducto
+create table EstadoProducto(
+	idEstProd char(3) not null primary key,
+	Nombre varchar(225),
+	Orden int
+);
+
+-- Categoria
+create table categoria(
+	idCategoria char(10) not null primary key,
+	Descripcion varchar(225),
+	Numero int
+);
+
+-- Tipo Producto
+create table tipo(
+	idTipo char(10) not null primary key,
+	Nombre varchar(225) not null,
+	Descripcion varchar(225)
+);
+
+-- Fraccion
+create table fraccion(
+	idFraccion char(1) not null primary key,
+	Nombre varchar(225) not null,
+	Descripcion varchar(225)
+);
+
+-- Proveedor
+create table proveedor(
+	idProveedor int AUTO_INCREMENT not null primary key,               -- > Numero de 4 digitos autoincrement
+	Nombre varchar(225) not null,
+	Ruc int not null,
+	RazonSocial varchar(225),
+	idPais char(2) not null,
+	foreign key (idPais) references Pais(idPais)
+	on delete cascade
+);
+ALTER TABLE proveedor AUTO_INCREMENT = 1000;
+
+-- Cliente
+create table cliente(
+	idCliente int auto_increment not null primary key,
+	Dni varchar(8) not null,
+	Nombre varchar(225) not null,
+	Apellido varchar(225) not null,
+	Direccion varchar(225),
+	Celular int,
+	idSexo char(1) not null,
+	Edad int,
+	FechaCreacion DATE not null,
+	Correo varchar(225) not null,
+	idEstado char(3) not null,
+	foreign key(idSexo) references sexo(idSexo)
+	on delete cascade,
+	foreign key(idEstado) references EstadoPersona(idEstado)
+	on delete cascade
+);
+ALTER TABLE Cliente AUTO_INCREMENT = 100;
+
+-- Empleado
+create table Empleado(
+	idEmpleado int AUTO_INCREMENT not null primary key,                                 -- > Numero de 4 digitos autoincrement
+	dni varchar(8) not null,
+	Nombre varchar(225) not null,
+	Celular int,
+	Direccion varchar(225),
+	Edad int,
+	idSexo char(1) not null,
+	FechaContratacion date not null,
+	idEstado char(3) not null,
+	users char(15),
+	foreign key(idSexo) references sexo(idSexo)
+	on delete cascade,
+	foreign key(idEstado) references EstadoPersona(idEstado)
+	on delete cascade
+);
+ALTER TABLE Empleado AUTO_INCREMENT = 1000;
+
+-- Orden
+create table orden(
+	idOrden int not null primary key,
+	idCliente int not null,
+	idEmpleado int not null,
+	Comanda int not null,
+	ValorVenta decimal(10,2) not null,
+	items int not null,
+	FechaCreacion date not null,
+	foreign key(idCliente) references cliente(idCliente),
+	foreign key(idEmpleado) references empleado(idEmpleado) 
+);
+
+
+-- Compra
+create table compra(
+	idCompra int AUTO_INCREMENT not null primary key,                 -- > Numero de 6 digitos auto increment
+	idProveedor int not null,
+	DireccionEntrega varchar(225),
+	FechaCompra date,
+	FechaEntrega date,
+	UsuarioCompra varchar(225),
+	foreign key(idProveedor) references proveedor(idProveedor)
+	on delete cascade
+);
+ALTER TABLE compra AUTO_INCREMENT = 100000;
+
+-- Producto
+create table producto(
+	idProducto int not null primary key,
+	descripcion varchar(225),
+	idCategoria char(10) not null,
+	Precio decimal(10,2),
+	Stock int,
+	FechaCreacion date,
+	idFraccion char(1) not null,
+	idProveedor int not null,
+	idTipo char(10) not null,
+	idEstProd char(3) not null,
+	foreign key(idCategoria) references categoria(idCategoria)
+	on delete cascade,
+	foreign key(idProveedor) references proveedor(idProveedor)
+	on delete cascade,
+	foreign key(idFraccion) references Fraccion(idFraccion)
+	on delete cascade,
+	foreign key(idEstProd) references EstadoProducto(idEstProd)
+	on delete cascade,
+	foreign key(idTipo) references Tipo(idTipo)
+	on delete cascade
+);
+
+-- Detalle Orden
+create table detalleOrden(
+	idOrden int not null,
+	idProducto int not null,
+	Correlativo int not null,
+	Cant int,
+	IGV int,
+	Importe decimal(10,2),
+	primary key(idOrden,idProducto),
+	foreign key(idOrden) references orden(idOrden),
+	foreign key(idProducto) references producto(idProducto)
+	on delete cascade on update cascade
+);
+
+-- Detalle_compra
+create table detalleCompra(
+	idCompra int not null,               
+	idProducto int not null,
+	Cantidad int,
+	primary key(idCompra, idProducto),
+	foreign key(idCompra) references compra(idCompra),
+	foreign key(idProducto) references producto(idProducto)
+);
+
+
+
+--INSERTAR DATOS A LAS TABLAS
+
+-- Insert Sexo
+insert into sexo values 
+('M','Masculino'),
+('F','Femenino')
+;
+
+-- Insert EstadoPersona
+insert into EstadoPersona values
+('CN','Contratado','1'),
+('DS','Despedido','2'),
+('RC','Recontratado','3')
+;
+
+-- Insert Pais
+insert into Pais values
+('DE','Alemania','276'),
+('AR','Argentina','32'),
+('BO','Bolivia','68'),
+('BR','Brasil','76'),
+('CA','Canadá','124'),
+('CL','Chile','152'),
+('CN','China','156'),
+('CO','Colombia','170'),
+('EC','Ecuador','218'),
+('SV','El Salvador','222'),
+('ES','España','724'),
+('US','Estados Unidos de América','840'),
+('PA','Panamá','591'),
+('PY','Paraguay','600'),
+('PE','Perú','604'),
+('PR','Puerto Rico','630'),
+('UY','Uruguay','858'),
+('VE','Venezuela','862')
+;
+
+-- insert EstadoProducto
+insert into EstadoProducto values
+('AC','Activo','1'),
+('DS','Descontinuado','2'),
+('EL','Eliminado','3'),
+('PB','Prueba','4')
+;
+
+-- Insert Categoria
+insert into categoria values
+('NUEVO','Productos recien llegados',1),
+('PRUEBA','Productos en pocas cantidades solo para probar si se vende',2),
+('ESTRELLA','Productos top de la empresa',3),
+('TEMPORADA','Productos solo para una temporada',4),
+('MERMA','Productos en mal estado',5),
+('DESCONTINU','Productos que ya no vendemos',6),
+('BAJA','Productos con un margen de venta muy bajos',7)
+;
+
+-- Insert Tipo
+insert into tipo values
+('T1','Alimentos','Comida'),
+('T2','Ropa','Vestimenta'),
+('T3','Limpieza','Productos Limpieza'),
+('T4','Higiene','Productos Higiene')
+;
+
+-- Insert Fraccion
+insert into fraccion values
+('Y','Fraccion','Fraccionarlo '),
+('N','Entero','Valor Entero'),
+('O','Otra Medida','Usado para los liquidos o productos sueltos')
+;
+
+-- Insert Proveedor   --> Tiene Auto increment
+insert into proveedor
+(Nombre, Ruc, RazonSocial, idPais)
+values
+('ANTAMINA COMPANY',08739816,'COMPANIA MINERA ANTAMINA S.A','US'),
+('CERRO VERDE',08735292,'SOCIEDAD MINERA CERRO VERDE S.A.A.','PA'),
+('SOUTHERN',608680170,'SOUTHERN PERU COPPER CORPORATION SUCURSA L DEL PERU','PE'),
+('MINERA LAS BAMBAS',608658476,'MINERA LAS BAMBAS S.A.','PE'),
+('GLENCORE',608626540,'GLENCORE PERU S.A.C.','CO'),
+('TRAFIGURA',608587251,'TRAFIGURA PERU SOCIEDAD ANONIMA CERRADA - TRAFIGURA PERU S.A.C.','PE'),
+('ANTAPACCAY',608572636,'COMPAÑIA MINERA ANTAPACCAY S.A.','PE'),
+('MINERA YANACOCHA',608569236,'MINERA YANACOCHA S.R.L.','PE'),
+('CAJAMARQUILLA',608556231,'VOTORANTIM METAIS - CAJAMARQUILLA S.A.','PE'),
+('BARRICK MISQUICHILCA',608513141,'MINERA BARRICK MISQUICHILCA SA','PA'),
+('PLUSPETROL',608491954,'PLUSPETROL PERU CORPORATION S.A.','PE')
+;
+
+-- Insert Cliente
+insert into cliente 
+(Dni, Nombre, Apellido, Direccion, Celular, idSexo, Edad, FechaCreacion, Correo, idEstado)
+values
+('27247430','Lucas','Olmos','AV. REPUBLICA DE PANAMA Nº 4825',920631779,'M',37,'2017/01/12 18:56','lucasfolmos@gmail.com','CN'),
+('24249271','Ignacio','Vittori','ALBERTO BRICEÑO Nº 217',911324042,'M',48,'2017/01/06 20:00','ignacio.vittori@globant.com','DS'),
+('42161132','Jessica Schroth','Schroth','AV. GENERAL DIEZ CANSECONº 527 - AREQUIPA',949079898,'F',32,'2017/01/05 12:56','jschrothp@gmail.com','RC'),
+('07757064','Antonio','Luján ','AV. LA MARINA N° 340, MARGEN IZQUIERDA DEL RIO AMAZONAS',988016071,'M',47,'2017/01/01 13:09','antoniolujan1@gmail.com','CN'),
+('41282882','Lorena','Arellano','SECHURA A 110 KM. AL SUR DE PIURA - AREA DE PLANTA CONCENTRADORA, OFICINAS Y COMPLEMENTARIOS DE LA MINA',975587707,'F',39,'2017/01/03 14:06','larellano0407@gmail.com','DS'),
+('45008895','Renzo','Arauco Dextre','AV. VICTOR MALASQUEZ KM 5 LOTE 10 SECTOR 24 DE JUNIO',966718480,'M',43,'2017/01/02 10:03','renzoarauco@gmail.com','RC'),
+('71225300','Maria Gracia','Johnston Monteghirfo ','AV. EL EJERCITO S/N CUADRA 11 - CUARTEL LOS CABITOS',945075060,'F',49,'2017/02/03 10:15','mgjohnston16@gmail.com','CN'),
+('46537919','Daniela Higueras','Higueras Elias','JIRON ILO 450 ESQ. CON JIRON CHOTA 998',989174123,'F',50,'2017/01/12 10:34','higuerasdaniela@gmail.com','DS'),
+('40482789','Giuliana','Castellanos','KM. 95 DE LA CARRETERA CENTRAL',973830839,'M',30,'2017/01/02 12:01','giulianacastell1234@gmail.com','RC'),
+('07732631','mylene','madueño hanza','AV. FORTUNATO CHIRICHINGNO S/N EL CHIPE',998111510,'F',19,'2017/01/11 12:17','mylenemadueno@gmail.com','CN'),
+('47596088','yoli alda ','carhuallanqui','AV. EVITAMIENTO Nº 242 - PARQUE INDUSTRIAL',936652192,'F',54,'2017/01/11 12:57','yolicr_21@hotmail.com','DS'),
+('10804038','ELSA','TAIMAN MACCHIAVELLO','CARRETERA CENTRAL KM. 8,500 DISTRITO STA. CLARA',948294804,'F',37,'2015/01/03 14:45','nanisvallet@hotmail.com','RC'),
+('09341280','Cyntia ','Belmont Dedekind','AV. PRODUCCIÓN NACIONAL 188',986485969,'F',59,'2015/02/01 17:11','cyndili1971@gmail.com','CN'),
+('10796594','Patricia','Ulmer','JR. LOS HORNOS N° 353 - URB. INFANTAS',991132300,'F',19,'2016/01/12 19:28','patricia.deulmer@gmail.com','DS'),
+('40404040','Consuelo ','Te','JR. ALONSO DE MOLINA N° 193. EX ZONA INDUSTRIAL',920844065,'F',23,'2016/01/20 11:15','cteruyaq@me.com','RC'),
+('10062149','Luisa','Muñante','PANAMERICANA SUR S/N, KM 3 + 751 VIA FERREA MATARANI – AREQUIPA',995638340,'F',54,'2016/01/12 10:54','lmunantedibos@gmail.com','CN'),
+('46261641','Fiorella ','Morote ','KM. 14.8 DE LA CARRETERA CENTRAL, GLORIA ALTA (MINERA LA GLORIA)',981272219,'F',26,'2016/01/12 15:30','fiorella.morote@hotmail.com','DS'),
+('45859591','Bladimir','Coaguila Garcia','SECTOR POBLADO YAURILLA S/N',949488216,'M',24,'2016/02/25 16:01','bladimir.cga@gmail.com','RC'),
+('42735548','Romina','Tataje Villalobos','CALLE DELTA 185 URB.PARQUE INTERNA.DE LA INDUSTR.Y COMERC.',994067126,'F',60,'2016/01/21 18:12','romi2209@gmail.com','CN'),
+('42602959','Tamia','Arnaiz perales','AV. LOS LIBERTADORES KM. 1.50',954783740,'F',27,'2016/02/28 19:48','tamia_arnaiz@hotmail.com','DS'),
+('88777830','Rosa','Gumez','AV. UNIV. S/N, GRP. 1, AA.HH. EDILBERTO RAMOS',998170318,'F',53,'2016/01/22 20:05','rosaluz.gumez@gmail.com','RC')
+;
+
+-- Insert Empleado
+insert into Empleado
+(dni, Nombre, Celular, Direccion, Edad, idSexo, FechaContratacion, idEstado, Users) 
+values 
+('72378112','Jose Luis Morales Vega','982310245','Av. El inti Lt.13 Mz. E San Juan Miraflores','21','M','2022/06/06','CN','jm7237'),
+('73567203','Alejandro Abondano Acevedo','972320245','AV. NICOLAS AYLLON Nº 9052, CARRETERA CENTRAL KM. 11.6','23','M','2022/06/04','DS','aa7356'),
+('74756294','Juan Carvajal Vargas','962330245','AV. GENERAL DIEZ CANSECO N° 527','25','M','2022/06/04','RC','jc7475'),
+('75945385','Adriana Carolina hernandez monterroza','952340245','AV. MIGUEL GRAU N° 615, MZ. F LOTE 61. ASOCIACION VIV. SANTA CLARA.','27','F','2022/06/08','CN','ac7594'),
+('77134476','Carla Marcela Rey Sanchez','942350245','CARRETERA FEDERICO BASADRE KM. 13.000','29','F','2022/06/23','DS','cm7713'),
+('78323567','Rosa Catalina Acero Caro','932360245','AV. NICOLAS AYLLON 2604 - 2610','31','F','2022/06/12','RC','rc7832')
+;
+
+-- Insert Ordeb
+Insert into orden 
+(idOrden, idCliente, idEmpleado, Comanda, ValorVenta, items, FechaCreacion)
+values
+(100000000,100,1000,991565726,52.5,4,'2021/01/02 9:01'),
+(100000001,101,1001,991565847,31.7,1,'2021/01/12 12:17'),
+(100000002,110,1002,109093537,48.9,2,'2021/01/23 23:06'),
+(100000003,120,1003,909481445,158.7,4,'2021/01/12 3:01'),
+(100000004,112,1004,991566232,286.64,5,'2021/01/21 11:08'),
+(100000005,113,1005,909505448,285.96,2,'2021/01/14 11:17'),
+(100000006,114,1000,991566321,99.9,5,'2021/01/23 11:17'),
+(100000007,115,1001,991562873,169.4,1,'2022/01/12 11:17'),
+(100000008,117,1002,909522531,62.6,1,'2022/01/23 11:17'),
+(100000009,115,1003,991566771,25.9,1,'2022/01/27 13:25'),
+(100000010,112,1004,991563050,159.7,2,'2022/01/28 13:51'),
+(100000011,102,1005,991563476,97.5,2,'2022/01/18 15:46'),
+(100000012,105,1000,991563802,49.9,2,'2022/01/16 16:56'),
+(100000013,104,1001,991565054,128.5,3,'2022/01/19 22:05'),
+(100000014,105,1002,991565042,59.94,3,'2022/01/01 22:07'),
+(100000015,109,1003,991566225,173.7,3,'2022/01/06 13:51')
+;
+
+-- insert Compra
+insert into compra 
+(idProveedor, DireccionEntrega, FechaCompra, FechaEntrega, UsuarioCompra)
+values
+(1011,'Av. Angamos 1567 - Surquillo','2022/04/02','2022/05/04','Juan Lopes Tomas Lino'),
+(1012,'Av. Angamos 1567 - Surquillo','2022/04/04','2022/05/06','Juan Lopes Tomas Lino'),
+(1013,'Av. Angamos 1567 - Surquillo','2022/04/06','2022/05/08','Juan Lopes Tomas Lino'),
+(1014,'Av. Angamos 1567 - Surquillo','2022/04/08','2022/05/10','Juan Lopes Tomas Lino'),
+(1015,'Av. Angamos 1567 - Surquillo','2022/04/10','2022/05/12','Juan Lopes Tomas Lino'),
+(1016,'Av. Tomas Valle 1234 - Callao','2022/04/12','2022/05/14','Juan Lopes Tomas Lino'),
+(1017,'Av. Tomas Valle 1234 - Callao','2022/04/14','2022/05/16','Juan Lopes Tomas Lino'),
+(1018,'Av. Tomas Valle 1234 - Callao','2022/04/16','2022/05/18','Juan Lopes Tomas Lino'),
+(1019,'Av. Tomas Valle 1234 - Callao','2022/04/18','2022/05/20','Juan Lopes Tomas Lino')
+;
+
+-- Insert producto
+insert into producto values
+(94499180,'Lipitor 40 Mg Tabletas Recubiertas','NUEVO',76.72,51,'2016/10/07 21:01','N',1011,'T1','AC'),
+(93913528,'Elvive Restaurador nutriente','PRUEBA',13.52,62,'2017/04/05 19:41','N',1011,'T2','DS'),
+(77338596,'Sedal Co-Creations  Ceramidas','ESTRELLA',3.92,67,'2017/04/05 19:43','N',1011,'T3','EL'),
+(53293461,'Acondicionador  (Frasco 350 ml)','TEMPORADA',21.0,99,'2017/12/02 16:00','Y',1012,'T4','PB'),
+(12607092,'Hyzaar 100Mg - 25 Mg Comprimidos Recubiertos','MERMA',278.1,35,'2017/12/04 16:45','N',1013,'T1','AC'),
+(47417775,'Estuche de colonia y Loción Royal Regiment','BAJA',46.3,66,'2017/12/23 16:47','N',1014,'T3','EL'),
+(82363101,'Fotoprotector Extrem Gel- Crema SPF 50+ Isdin','NUEVO',110.35,53,'2017/04/12 19:41','N',1015,'T4','PB'),
+(56624345,'Loción Reparadora Ureadin RX 10 Lotion Plus 10% Isdin','PRUEBA',91.9,94,'2017/04/24 19:14','N',1016,'T1','AC'),
+(29742354,'Crema Hidratante Ureadin RX 20 Isdin','ESTRELLA',77.1,46,'2017/04/16 19:14','N',1017,'T2','DS'),
+(24978054,'Crema Exfoliante Ureadin Ultra 30% de 50 ml','TEMPORADA',12.1,36,'2017/06/12 16:06','N',1011,'T3','EL'),
+(27880275,'Gel Oil Exfoliante Ureadin Ultra 40% de 30 ml','MERMA',3.3,72,'2017/06/14 16:02','N',1018,'T4','PB'),
+(78402321,'Amoxil 250 Mg/5 Ml Polvo Para Suspensión','DESCONTINU',28.8,79,'2017/10/18 20:04','N',1019,'T1','AC'),
+(89792853,'Gatorade Solución Oral Sabor Tropical Fruit','BAJA',2.9,19,'2017/10/19 20:04','N',1011,'T2','DS'),
+(64532674,'Gatorade Solución Oral Sabor Mandarina','NUEVO',2.9,28,'2017/10/17 20:34','N',1011,'T3','EL'),
+(19651844,'Preservativos Anatómico 4 Variedades Long-Love Unidus','PRUEBA',5.0,17,'2017/04/05 19:42','Y',1013,'T4','PB'),
+(54067545,'Cepillo Dental Colgate Medio Triple Acción','ESTRELLA',6.5,10,'2017/10/02 21:01','N',1013,'T1','AC'),
+(17812335,'Gupill 1.5mg Tableta Recubierta','TEMPORADA',16.9,34,'2017/10/01 21:01','Y',1014,'T2','DS'),
+(92949646,'Neurobion 1000 Solución Inyectable','MERMA',44.01,2,'2017/10/29 21:01','N',1015,'T3','EL')
+;
+
+-- insert detalleorden
+insert into detalleOrden values
+(100000000,94499180,1,24,331.15,2172.15),
+(100000001,93913528,1,14,34.070,223.3504),
+(100000002,77338596,1,60,42.336,277.536),
+(100000003,53293461,1,90,340.2,2230.2),
+(100000004,12607092,1,35,1752.03,11485.53),
+(100000005,47417775,1,10,37.8,247.8),
+(100000006,47417775,1,40,333.36,2185.36),
+(100000007,82363101,1,50,993.15,6510.65),
+(100000008,56624345,1,40,661.68,4337.68),
+(100000009,29742354,1,10,138.78,909.78),
+(100000010,24978054,1,30,2,12),
+(100000011,27880275,1,47,22,68),
+(100000012,78402321,1,40,207.36,1359.36),
+(100000013,89792853,1,10,5.22,34.22),
+(100000014,64532674,1,20,10.44,68.44),
+(100000015,19651844,1,10,15.3,100.3)
+;
+select * from compra
+-- insert detallecompra
+insert into detalleCompra values
+(100010,93913528,12),
+(100012,77338596,14),
+(100013,53293461,13),
+(100014,12607092,14),
+(100015,12607092,19),
+(100016,47417775,15),
+(100017,82363101,12),
+(100016,56624345,14),
+(100011,29742354,13),
+(100013,24978054,14),
+(100011,27880275,19),
+(100012,78402321,15),
+(100012,89792853,12),
+(100011,64532674,14),
+(100010,19651844,13),
+(100009,54067545,14),
+(100009,17812335,19),
+(100009,92949646,15),
+(100009,19651844,12),
+(100009,64532674,14)
+;
+
